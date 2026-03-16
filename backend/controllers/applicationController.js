@@ -68,6 +68,7 @@ exports.saveApplicantProfile = async (req, res) => {
 
   const {
    application_id,
+   name,
    age,
    date_of_birth,
    gender,
@@ -82,11 +83,12 @@ exports.saveApplicantProfile = async (req, res) => {
 
   await db.query(
    `INSERT INTO applicant_profiles
-   (application_id,age,date_of_birth,gender,marital_status,
+   (application_id,name,age,date_of_birth,gender,marital_status,
    pan_number,aadhaar_number,address,city,state,pincode)
-   VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+   VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
    [
     application_id,
+    name,
     age,
     date_of_birth,
     gender,
@@ -102,8 +104,7 @@ exports.saveApplicantProfile = async (req, res) => {
 
   res.json({ message: "Applicant profile saved successfully" })
 
- }
- catch (error) {
+ } catch (error) {
 
   res.status(500).json(error)
 
@@ -173,6 +174,7 @@ exports.saveFinancial = async (req, res) => {
    credit_card_balance,
    bank_name,
    bank_account_type,
+   bank_account_number,
    average_monthly_balance
   } = req.body
 
@@ -180,8 +182,9 @@ exports.saveFinancial = async (req, res) => {
    `INSERT INTO financial_details
    (application_id,existing_loans,existing_emi,
    credit_card_limit,credit_card_balance,
-   bank_name,bank_account_type,average_monthly_balance)
-   VALUES($1,$2,$3,$4,$5,$6,$7,$8)`,
+   bank_name,bank_account_type,bank_account_number,
+   average_monthly_balance)
+   VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
    [
     application_id,
     existing_loans,
@@ -190,6 +193,7 @@ exports.saveFinancial = async (req, res) => {
     credit_card_balance,
     bank_name,
     bank_account_type,
+    bank_account_number,
     average_monthly_balance
    ]
   )

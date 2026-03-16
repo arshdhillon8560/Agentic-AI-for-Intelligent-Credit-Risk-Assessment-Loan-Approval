@@ -16,19 +16,34 @@ def get_application_data(application_id):
 
     cur = conn.cursor()
 
-    cur.execute("SELECT * FROM applications WHERE application_id=%s",(application_id,))
+    cur.execute(
+        "SELECT * FROM applications WHERE application_id=%s",
+        (application_id,)
+    )
     application = cur.fetchone()
 
-    cur.execute("SELECT * FROM applicant_profiles WHERE application_id=%s",(application_id,))
+    cur.execute(
+        "SELECT * FROM applicant_profiles WHERE application_id=%s",
+        (application_id,)
+    )
     profile = cur.fetchone()
 
-    cur.execute("SELECT * FROM employment_details WHERE application_id=%s",(application_id,))
+    cur.execute(
+        "SELECT * FROM employment_details WHERE application_id=%s",
+        (application_id,)
+    )
     employment = cur.fetchone()
 
-    cur.execute("SELECT * FROM financial_details WHERE application_id=%s",(application_id,))
+    cur.execute(
+        "SELECT * FROM financial_details WHERE application_id=%s",
+        (application_id,)
+    )
     financial = cur.fetchone()
 
-    cur.execute("SELECT * FROM documents WHERE application_id=%s",(application_id,))
+    cur.execute(
+        "SELECT * FROM documents WHERE application_id=%s",
+        (application_id,)
+    )
     documents = cur.fetchone()
 
     return {
@@ -40,10 +55,11 @@ def get_application_data(application_id):
         },
 
         "profile":{
+            "name":profile[12],
             "age":profile[2],
             "dob":profile[3],
-            "pan":profile[6],
-            "aadhaar":profile[7]
+            "pan_number":profile[6],
+            "aadhaar_number":profile[7]
         },
 
         "employment":{
@@ -61,7 +77,8 @@ def get_application_data(application_id):
             "existing_emi":financial[3],
             "credit_card_limit":financial[4],
             "credit_card_balance":financial[5],
-            "bank_balance":financial[8]
+            "bank_account_number":financial[9],
+            "average_balance":financial[8]
         },
 
         "documents":{

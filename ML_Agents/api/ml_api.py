@@ -3,7 +3,6 @@ import joblib
 import numpy as np
 import os
 
-
 from utils.feature_engineering import (
     compute_debt_to_income_ratio,
     compute_credit_utilization,
@@ -13,24 +12,43 @@ from utils.feature_engineering import (
 )
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 MODELS_DIR = os.path.join(BASE_DIR, "models")
 
-
 app = FastAPI()
-
 
 credit_model = joblib.load(os.path.join(MODELS_DIR, "credit_model.pkl"))
 fraud_model = joblib.load(os.path.join(MODELS_DIR, "fraud_model.pkl"))
 scaler = joblib.load(os.path.join(MODELS_DIR, "scaler.pkl"))
 
 
+# -------- Helper to sanitize balances --------
+def clean_balance_history(history):
+
+    cleaned = []
+
+    for item in history:
+
+        if isinstance(item, dict):
+            value = item.get("balance") or item.get("amount")
+            if value is not None:
+                cleaned.append(float(value))
+
+        else:
+            cleaned.append(float(item))
+
+    return cleaned
+
+
 @app.get("/")
 def home():
     return {"message": "ML Agents API is running"}
 
+
+# ---------------- CREDIT MODEL ----------------
 @app.post("/predict-credit")
 def predict_credit(data: dict):
+
+    balances = clean_balance_history(data["bank_balance_history"])
 
     debt_ratio = compute_debt_to_income_ratio(
         data["monthly_income"],
@@ -42,9 +60,7 @@ def predict_credit(data: dict):
         data["credit_card_limit"]
     )
 
-    income_stability = compute_income_stability(
-        data["bank_balance_history"]
-    )
+    income_stability = compute_income_stability(balances)
 
     repayment_score = compute_repayment_history_score(
         data["late_payments"],
@@ -52,6 +68,7 @@ def predict_credit(data: dict):
     )
 
     features = np.array([[
+
         data["age"],
         data["monthly_income"],
         debt_ratio,
@@ -64,6 +81,7 @@ def predict_credit(data: dict):
         data["loan_tenure"],
         data["account_balance"],
         income_stability
+
     ]])
 
     features = scaler.transform(features)
@@ -83,14 +101,16 @@ def predict_credit(data: dict):
     }
 
 
+# ---------------- FRAUD MODEL ----------------
 @app.post("/predict-fraud")
 def predict_fraud(data: dict):
 
-    account_pattern = compute_account_balance_pattern(
-        data["bank_balance_history"]
-    )
+    balances = clean_balance_history(data["bank_balance_history"])
+
+    account_pattern = compute_account_balance_pattern(balances)
 
     features = [[
+
         data["income_declared"],
         data["income_detected"],
         data["address_mismatch"],
@@ -99,6 +119,7 @@ def predict_fraud(data: dict):
         account_pattern,
         data["employment_mismatch"],
         data["rapid_loan_requests"]
+
     ]]
 
     pred = fraud_model.predict(features)[0]

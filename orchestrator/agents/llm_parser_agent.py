@@ -7,42 +7,55 @@ load_dotenv()
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
+
 def parse_document(text):
 
     prompt = f"""
 You are a financial document parser.
 
-From the bank statement text below extract financial features.
+The document text may contain a bank statement, salary slip, or ITR.
 
-Return ONLY valid JSON.
+Extract the following fields.
 
-Fields required:
-age
+IMPORTANT RULES:
+
+1. salary_name must be the employee name from the salary slip
+2. It should be a PERSON NAME (example: Arshdeep Singh)
+3. DO NOT return words like:
+   Salary Credit
+   Transaction
+   Withdrawal
+   Deposit
+4. bank_account_holder must be the name in bank statement
+5. itr_name must be the taxpayer name
+6. itr_pan must be the PAN number from ITR
+
+Return ONLY JSON.
+
+Fields:
+
+bank_account_holder
+account_number
+salary_name
+itr_name
+itr_pan
 monthly_income
-existing_emi
-credit_card_balance
-credit_card_limit
-number_of_existing_loans
-years_in_job
-credit_history_length
-late_payments
-total_payments
-account_balance
 bank_balance_history
+account_balance
 
-Bank Statement Text:
+Document Text:
 {text}
 """
 
     completion = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
-            {"role":"user","content":prompt}
+            {"role": "user", "content": prompt}
         ]
     )
 
     content = completion.choices[0].message.content
 
-    content = content.replace("```json","").replace("```","").strip()
+    content = content.replace("```json", "").replace("```", "").strip()
 
     return json.loads(content)
