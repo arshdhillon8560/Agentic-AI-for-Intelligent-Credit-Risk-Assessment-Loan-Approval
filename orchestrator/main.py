@@ -17,7 +17,6 @@ from agents.document_validation_agent import validate_document_data
 from utils.data_cleaner import clean_numeric, clean_balance_history
 from agents.document_consistency_agent import check_document_consistency
 
-
 app = FastAPI()
 executor = ThreadPoolExecutor(max_workers=4)
 
@@ -30,24 +29,15 @@ def process_application(data: dict):
         application_id = data.get("application_id")
 
         if not application_id:
-            raise HTTPException(
-                status_code=400,
-                detail="application_id is required"
-            )
+            raise HTTPException(400, "application_id is required")
 
         print("Processing application:", application_id)
 
         application_data = get_application_data(application_id)
 
-        if not application_data:
-            raise HTTPException(
-                status_code=404,
-                detail="Application not found"
-            )
-
         docs = application_data["documents"]
 
-        # ---------- PARALLEL STAGE 1 ----------
+        # ---------- OCR + EMPLOYMENT ----------
         ocr_future = executor.submit(
             extract_text,
             docs["bank_statement_url"]
@@ -61,10 +51,12 @@ def process_application(data: dict):
         text = ocr_future.result()
         employment_verified = employment_future.result()
 
-        # ---------- DOCUMENT PARSING ----------
+        # ---------- PARSE ----------
         features = extract_financial_features(text)
         structured = parse_document(text)
         structured.update(features)
+
+        print("Parsed document data:", structured)
 
         # ---------- DOCUMENT CONSISTENCY ----------
         valid, reason = check_document_consistency(
@@ -73,20 +65,16 @@ def process_application(data: dict):
             structured
         )
 
-        print("Parsed document data:", structured)
-
         if not valid:
 
-            print("Document mismatch:", reason)
-
-            update_application_status(application_id, "REJECTED")
+            update_application_status(application_id, "REJECTED", reason)
 
             save_agent_result(
                 application_id,
                 0,
                 1,
                 False,
-                "DOCUMENT_MISMATCH"
+                "REJECTED"
             )
 
             return {
@@ -95,7 +83,7 @@ def process_application(data: dict):
                 "reason": reason
             }
 
-        # ---------- DATA CLEANING ----------
+        # ---------- CLEAN ----------
         structured["monthly_income"] = clean_numeric(
             structured.get("monthly_income", 50000), 50000
         )
@@ -120,29 +108,23 @@ def process_application(data: dict):
             structured.get("bank_balance_history", [])
         )
 
-        # ---------- DEFAULT VALUES ----------
-        structured.setdefault("age", 30)
-        structured.setdefault("number_of_existing_loans", 0)
-        structured.setdefault("years_in_job", 2)
-        structured.setdefault("credit_history_length", 3)
-        structured.setdefault("late_payments", 0)
-        structured.setdefault("total_payments", 12)
-
         # ---------- VALIDATION ----------
         validation = validate_document_data(structured)
 
         if not validation["valid"]:
 
-            print("Document validation failed:", validation["reason"])
-
-            update_application_status(application_id, "REJECTED")
+            update_application_status(
+                application_id,
+                "REJECTED",
+                validation["reason"]
+            )
 
             save_agent_result(
                 application_id,
                 0,
                 1,
                 False,
-                "INVALID_DOCUMENT"
+                "REJECTED"
             )
 
             return {
@@ -151,22 +133,47 @@ def process_application(data: dict):
                 "reason": validation["reason"]
             }
 
-        # ---------- PARALLEL ML ----------
-        credit_future = executor.submit(get_credit_score, structured)
-        fraud_future = executor.submit(get_fraud_score, structured)
+        # ---------- ML ----------
+        credit = get_credit_score(structured)
+        fraud = get_fraud_score(structured)
 
-        credit = credit_future.result()
-        fraud = fraud_future.result()
-
-        # ---------- FINAL DECISION ----------
         decision = make_decision(
             credit["pd_score"],
             fraud["fraud_probability"],
             employment_verified
         )
 
-        print("Final decision:", decision)
+        # 🔥 FIX: Normalize decision
+        decision = decision.upper()
 
+        # ---------- FINAL STATUS ----------
+        if decision == "ESCALATE":
+
+            update_application_status(
+                application_id,
+                "ESCALATED",
+                "Sent to credit officer for manual review"
+            )
+
+            escalate_application(application_id)
+
+        elif decision == "APPROVED":
+
+            update_application_status(
+                application_id,
+                "APPROVED",
+                None
+            )
+
+        else:
+
+            update_application_status(
+                application_id,
+                "REJECTED",
+                "High credit risk"
+            )
+
+        # ---------- SAVE RESULT ----------
         save_agent_result(
             application_id,
             credit["pd_score"],
@@ -175,24 +182,12 @@ def process_application(data: dict):
             decision
         )
 
-        update_application_status(application_id, decision)
-
-        if decision == "ESCALATE":
-            escalate_application(application_id)
-
         return {
             "application_id": application_id,
-            "decision": decision,
-            "credit_score": credit["pd_score"],
-            "fraud_probability": fraud["fraud_probability"],
-            "employment_verified": employment_verified
+            "decision": decision
         }
 
     except Exception as e:
 
         print("Orchestrator error:", str(e))
-
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
-        )
+        raise HTTPException(500, str(e))

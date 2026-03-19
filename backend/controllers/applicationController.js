@@ -304,22 +304,40 @@ exports.trackApplication = async (req, res) => {
   const { id } = req.params
 
   const result = await db.query(
-   `SELECT application_id, status, kyc_status, created_at
+   `SELECT application_id, status, kyc_status, reason, created_at
     FROM applications
     WHERE application_id = $1`,
    [id]
   )
 
-  if(result.rows.length === 0){
-   return res.status(404).json({
-    message:"Application not found"
-   })
+  if (result.rows.length === 0) {
+   return res.status(404).json({ message: "Application not found" })
   }
 
-  res.json(result.rows[0])
+  const app = result.rows[0]
+
+  let message = ""
+
+  if (app.status === "REJECTED") {
+    message = `Application Rejected: ${app.reason}`
+  }
+  else if (app.status === "ESCALATED") {
+    message = "Your application is under review by credit officer"
+  }
+  else if (app.status === "APPROVED") {
+    message = "Your application is approved"
+  }
+  else {
+    message = "Your application is in progress"
+  }
+
+  res.json({
+    ...app,
+    user_message: message
+  })
 
  }
- catch(error){
+ catch (error) {
 
   res.status(500).json(error)
 
