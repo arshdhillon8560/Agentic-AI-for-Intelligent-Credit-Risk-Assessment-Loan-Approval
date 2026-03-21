@@ -304,11 +304,27 @@ exports.trackApplication = async (req, res) => {
   const { id } = req.params
 
   const result = await db.query(
-   `SELECT application_id, status, kyc_status, reason, created_at
-    FROM applications
-    WHERE application_id = $1`,
-   [id]
-  )
+  `SELECT 
+    a.application_id,
+    a.status,
+    a.kyc_status,
+    a.reason,
+    a.created_at,
+    
+    ar.credit_pd_score,
+    ar.fraud_probability,
+    ar.employment_verified,
+    ar.final_decision
+
+   FROM applications a
+   LEFT JOIN agent_results ar
+   ON a.application_id = ar.application_id
+
+   WHERE a.application_id = $1`,
+  [id]
+);
+
+
 
   if (result.rows.length === 0) {
    return res.status(404).json({ message: "Application not found" })
@@ -332,9 +348,15 @@ exports.trackApplication = async (req, res) => {
   }
 
   res.json({
-    ...app,
-    user_message: message
-  })
+  ...app,
+  user_message: message,
+  agent_scores: {
+    credit_pd_score: app.credit_pd_score,
+    fraud_probability: app.fraud_probability,
+    employment_verified: app.employment_verified,
+    final_decision: app.final_decision
+  }
+});
 
  }
  catch (error) {
@@ -344,3 +366,31 @@ exports.trackApplication = async (req, res) => {
  }
 
 }
+
+exports.getUserApplications = async (req, res) => {
+  try {
+    console.log("REQ.USER:", req.user);
+
+    if (!req.user?.id) {
+      return res.status(400).json({ message: "User ID missing in token" });
+    }
+
+    const userId = req.user.id;
+
+    const result = await db.query(
+      `SELECT application_id, status, kyc_status, created_at
+       FROM applications
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [userId]
+    );
+
+    console.log("APPLICATIONS FOUND:", result.rows);
+
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error("GET APPLICATION ERROR:", err);
+    res.status(500).json(err);
+  }
+};

@@ -11,7 +11,8 @@ const {
  saveFinancial,
  uploadDocuments,
  processApplication,
- trackApplication
+ trackApplication,
+ getUserApplications
 } = require("../controllers/applicationController")
 
 // Protected routes
@@ -22,6 +23,8 @@ router.post("/profile", authMiddleware, saveApplicantProfile)
 router.post("/employment", authMiddleware, saveEmployment)
 
 router.post("/financial", authMiddleware, saveFinancial)
+
+router.get("/all", authMiddleware, getUserApplications);
 
 router.post(
  "/upload-documents",
