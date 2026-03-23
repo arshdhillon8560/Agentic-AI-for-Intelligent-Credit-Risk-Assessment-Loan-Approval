@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { createUser, findUserByEmail } = require("../models/userModel");
 
 
+
 exports.signup = async (req, res) => {
   try {
     const { full_name, email, password, phone_number } = req.body;
@@ -26,11 +27,24 @@ exports.signup = async (req, res) => {
       phone_number
     });
 
+  
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role || "applicant"
+      },
+      "secret",
+      { expiresIn: "1d" }
+    );
+
     res.json({
-      message: "User created successfully",
+      message: "Signup successful",
+      token,
       user: {
         id: user.id,
-        email: user.email
+        email: user.email,
+        role: user.role || "applicant"
       }
     });
 
@@ -42,6 +56,7 @@ exports.signup = async (req, res) => {
 
 
 
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -49,16 +64,15 @@ exports.login = async (req, res) => {
     const user = await findUserByEmail(email);
 
     if (!user) {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(400).json({ message: "User not found" });
     }
 
     const match = await bcrypt.compare(password, user.password_hash);
 
     if (!match) {
-      return res.status(400).json({ error: "Invalid password" });
+      return res.status(400).json({ message: "Invalid password" });
     }
 
-   
     const token = jwt.sign(
       {
         id: user.id,

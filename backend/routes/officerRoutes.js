@@ -1,11 +1,30 @@
-const express = require("express")
-const router = express.Router()
-const officerController = require("../controllers/officerController")
+const express = require("express");
+const router = express.Router();
 
-router.get("/escalated", officerController.getEscalatedApplications)
+const officerController = require("../controllers/officerController");
+const authMiddleware = require("../middleware/authMiddleware");
+const roleMiddleware = require("../middleware/roleMiddleware");
 
-router.get("/application/:id", officerController.getApplicationDetails)
 
-router.post("/decision", officerController.updateDecision)
+router.get(
+  "/escalated",
+  authMiddleware,
+  roleMiddleware("officer"),
+  officerController.getEscalatedApplications
+);
 
-module.exports = router
+router.get(
+  "/application/:id",
+  authMiddleware,
+  roleMiddleware("officer"),
+  officerController.getApplicationDetails
+);
+
+router.post(
+  "/decision",
+  authMiddleware,
+  roleMiddleware("officer"),
+  officerController.updateDecision
+);
+
+module.exports = router;

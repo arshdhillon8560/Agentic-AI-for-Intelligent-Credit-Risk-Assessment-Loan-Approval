@@ -4,47 +4,46 @@ import numpy as np
 
 def extract_financial_features(text):
 
-    # find salary credits
-    salary_matches = re.findall(r"Salary\s+Credit\s+(\d+)", text)
+    clean_text = text.replace(",", "")
 
-    salaries = [int(x) for x in salary_matches]
+    # ---------- SALARY ----------
+    salary_matches = re.findall(
+        r"Salary\s*Credit\s*\n?\s*(\d+)",
+        clean_text,
+        re.IGNORECASE
+    )
 
-    monthly_income = max(salaries) if salaries else 50000
+    if not salary_matches:
+        salary_matches = re.findall(
+            r"Gross\s*Salary\s*(\d+)",
+            clean_text,
+            re.IGNORECASE
+        )
 
-    # find withdrawals
-    withdrawal_matches = re.findall(r"Withdrawal\s+(\d+)", text)
+    if not salary_matches:
+        raise Exception("Salary not found in documents")
 
-    withdrawals = [int(x) for x in withdrawal_matches]
+    monthly_income = max([int(x) for x in salary_matches])
 
-    total_withdrawals = sum(withdrawals) if withdrawals else 0
+    print("EXTRACTED SALARY:", monthly_income)
 
-    # find balances
-    balance_matches = re.findall(r"Balance\s+(\d+)", text)
+    # ---------- BALANCES ----------
+    balances = re.findall(r"\n(\d{4,6})\n", clean_text)
+    balances = [int(x) for x in balances]
 
-    balances = [int(x) for x in balance_matches]
+    if not balances:
+        raise Exception("Balance data not found")
 
-    if balances:
-        avg_balance = int(np.mean(balances))
-        min_balance = min(balances)
-        max_balance = max(balances)
-    else:
-        avg_balance = 50000
-        min_balance = 50000
-        max_balance = 50000
-
-    # income stability
-    if balances:
-        stability = 1 - (np.std(balances) / np.mean(balances))
-        stability = max(0, min(1, stability))
-    else:
-        stability = 0.5
+    avg_balance = int(np.mean(balances))
 
     return {
         "monthly_income": monthly_income,
-        "total_withdrawals": total_withdrawals,
+        "account_balance": balances[-1],
+        "bank_balance_history": balances,
         "avg_balance": avg_balance,
-        "min_balance": min_balance,
-        "max_balance": max_balance,
-        "account_balance": balances[-1] if balances else 50000,
-        "income_stability": round(stability, 2)
+        "min_balance": min(balances),
+        "max_balance": max(balances),
+        "income_stability": round(
+            1 - (np.std(balances) / np.mean(balances)), 2
+        )
     }

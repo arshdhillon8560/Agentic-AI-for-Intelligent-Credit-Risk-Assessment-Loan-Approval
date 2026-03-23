@@ -12,6 +12,7 @@ conn = psycopg2.connect(
     password=os.getenv("DB_PASSWORD")
 )
 
+
 def get_application_data(application_id):
 
     cur = conn.cursor()
@@ -48,43 +49,42 @@ def get_application_data(application_id):
 
     return {
 
-        "application":{
-            "loan_amount":application[3],
-            "loan_tenure":application[4],
-            "loan_purpose":application[5]
+        "application": {
+            "loan_amount": application[3],
+            "loan_tenure": application[4],
+            "loan_purpose": application[5]
         },
 
-        "profile":{
-            "name":profile[12],
-            "age":profile[2],
-            "dob":profile[3],
-            "pan_number":profile[6],
-            "aadhaar_number":profile[7]
+        "profile": {
+            "name": profile[12],
+            "age": profile[2],
+            "dob": profile[3],
+            "pan_number": profile[6],
+            "aadhaar_number": profile[7]
         },
 
-        "employment":{
-            "employment_type":employment[2],
-            "employer_name":employment[3],
-            "industry":employment[4],
-            "job_title":employment[5],
-            "years_in_job":employment[6],
-            "total_experience":employment[7],
-            "monthly_income":employment[8]
+        "employment": {
+            "employment_type": employment[2],
+            "employer_name": employment[3],
+            "industry": employment[4],
+            "job_title": employment[5],
+            "years_in_current_job": employment[6],   # ✅ FIXED
+            "total_experience": employment[7],
+            "monthly_income": employment[8]
         },
 
-        "financial":{
-            "existing_loans":financial[2],
-            "existing_emi":financial[3],
-            "credit_card_limit":financial[4],
-            "credit_card_balance":financial[5],
-            "bank_account_number":financial[9],
-            "average_balance":financial[8]
+        "financial": {
+            "existing_loans": financial[2],
+            "existing_emi": financial[3],
+            "credit_card_limit": financial[4],       # ✅ FIXED
+            "credit_card_balance": financial[5],     # ✅ FIXED
+            "bank_account_number": financial[9],
+            "average_balance": financial[8]
         },
 
-        "documents":{
-            "bank_statement_url":documents[2],
-            "salary_slip_url":documents[3],
-            "itr_document_url":documents[4]
+        "documents": {
+            "bank_statement_url": documents[2],
+            "salary_slip_url": documents[3],
+            "itr_document_url": documents[4]
         }
-
     }

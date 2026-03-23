@@ -1,7 +1,6 @@
 const db = require("../config/db");
 const generateApplicationId = require("../utils/generateApplicationId");
 const { sendToOrchestrator } = require("../services/orchestratorService");
-const multer = require("multer");
 const cloudinary = require("../config/cloudinary");
 const streamifier = require("streamifier");
 
@@ -244,23 +243,29 @@ exports.trackApplication = async (req, res) => {
 
     const result = await db.query(
       `SELECT 
-    a.application_id,
-    a.status,
-    a.kyc_status,
-    a.reason,
-    a.created_at,
-    
-    ar.credit_pd_score,
-    ar.fraud_probability,
-    ar.employment_verified,
-    ar.final_decision
+        a.application_id,
+        a.status,
+        a.kyc_status,
+        a.reason,
+        a.created_at,
 
-   FROM applications a
-   LEFT JOIN agent_results ar
-   ON a.application_id = ar.application_id
+        ar.credit_pd_score,
+        ar.fraud_probability,
+        ar.employment_verified,
+        ar.final_decision
 
-   WHERE a.application_id = $1`,
-      [id],
+      FROM applications a
+
+      LEFT JOIN LATERAL (
+        SELECT *
+        FROM agent_results
+        WHERE application_id = a.application_id
+        ORDER BY created_at DESC
+        LIMIT 1
+      ) ar ON true
+
+      WHERE a.application_id = $1`,
+      [id]
     );
 
     if (result.rows.length === 0) {
@@ -268,6 +273,8 @@ exports.trackApplication = async (req, res) => {
     }
 
     const app = result.rows[0];
+
+    console.log("FINAL API DATA:", app); // DEBUG
 
     let message = "";
 
@@ -291,7 +298,9 @@ exports.trackApplication = async (req, res) => {
         final_decision: app.final_decision,
       },
     });
+
   } catch (error) {
+    console.error("TRACK ERROR:", error);
     res.status(500).json(error);
   }
 };
