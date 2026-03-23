@@ -29,6 +29,7 @@ export const KYCVerification = ({
         name: profileData.name,
         dob: formattedDOB
       });
+
       setPanVerified(true);
     } catch (err) {
       setError(err.message || 'PAN verification failed');
@@ -40,23 +41,21 @@ export const KYCVerification = ({
   const handleSendOTP = async () => {
     setLoading(true);
     setError('');
-  
+
     try {
       const response = await onSendOTP({
         aadhaar: profileData.aadhaar_number
       });
-  
-      console.log("SEND OTP RESPONSE:", response);
-  
+
       const refId = response?.data?.reference_id;
-  
+
       if (!refId) {
-        throw new Error("Reference ID not received from server");
+        throw new Error("Reference ID not received");
       }
-  
-      setReferenceId(refId.toString()); // ✅ convert to string (important)
+
+      setReferenceId(refId.toString());
       setOtpSent(true);
-  
+
     } catch (err) {
       setError(err.message || 'Failed to send OTP');
     } finally {
@@ -67,16 +66,17 @@ export const KYCVerification = ({
   const handleVerifyOTP = async () => {
     setLoading(true);
     setError('');
-  
+
     try {
       await onVerifyOTP({
         application_id: applicationId,
         reference_id: referenceId.toString().trim(),
         otp: otp.toString().trim()
       });
-  
+
+      // ✅ DO NOT show success — just move to processing state
       setOtpVerified(true);
-  
+
     } catch (err) {
       setError(err.message || 'OTP verification failed');
     } finally {
@@ -86,89 +86,74 @@ export const KYCVerification = ({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-slate-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">PAN Verification</h3>
+
+      {/* PAN */}
+      <div className="bg-white border rounded-lg p-6">
+        <h3 className="font-semibold mb-4">PAN Verification</h3>
 
         {panVerified ? (
-          <div className="flex items-center gap-2 text-green-600">
-            <CheckCircle className="w-5 h-5" />
-            <span>PAN Verified Successfully</span>
+          <div className="flex items-center gap-2 text-primary">
+            <CheckCircle size={18} />
+            PAN Verified
           </div>
         ) : (
-          <div>
-            <p className="text-sm text-slate-600 mb-4">
-              PAN: {profileData.pan_number}
-            </p>
+          <button
+            onClick={handlePANVerify}
+            disabled={loading}
+            className="bg-primary text-white px-5 py-2 rounded"
+          >
+            {loading ? 'Verifying...' : 'Verify PAN'}
+          </button>
+        )}
+      </div>
+
+      {/* AADHAAR */}
+      <div className="bg-white border rounded-lg p-6">
+        <h3 className="font-semibold mb-4">Aadhaar Verification</h3>
+
+        {!panVerified ? (
+          <div className="flex items-center gap-2 text-gray-500">
+            <AlertCircle size={18} />
+            Verify PAN first
+          </div>
+        ) : otpVerified ? (
+
+          /* ✅ FIXED UI */
+          <div className="flex flex-col items-center gap-3 text-primary">
+            <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+            <span>Processing KYC & Decision...</span>
+          </div>
+
+        ) : !otpSent ? (
+          <button
+            onClick={handleSendOTP}
+            disabled={loading}
+            className="bg-primary text-white px-5 py-2 rounded"
+          >
+            {loading ? 'Sending OTP...' : 'Send OTP'}
+          </button>
+        ) : (
+          <div className="space-y-3">
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="border p-2 rounded w-full"
+            />
+
             <button
-              onClick={handlePANVerify}
-              disabled={loading}
-              className="bg-sky-600 text-white px-6 py-2 rounded-lg hover:bg-sky-700 transition-colors disabled:opacity-50"
+              onClick={handleVerifyOTP}
+              disabled={loading || otp.length !== 6}
+              className="bg-primary text-white px-5 py-2 rounded"
             >
-              {loading ? 'Verifying...' : 'Verify PAN'}
+              {loading ? 'Verifying...' : 'Verify OTP'}
             </button>
           </div>
         )}
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">Aadhaar OTP Verification</h3>
-
-        {!panVerified ? (
-          <div className="flex items-center gap-2 text-slate-500">
-            <AlertCircle className="w-5 h-5" />
-            <span>Please verify PAN first</span>
-          </div>
-        ) : otpVerified ? (
-          <div className="flex items-center gap-2 text-green-600">
-            <CheckCircle className="w-5 h-5" />
-            <span>Aadhaar Verified Successfully - Processing Application...</span>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-sm text-slate-600">
-              Aadhaar: {profileData.aadhaar_number}
-            </p>
-
-            {!otpSent ? (
-              <button
-                onClick={handleSendOTP}
-                disabled={loading}
-                className="bg-sky-600 text-white px-6 py-2 rounded-lg hover:bg-sky-700 transition-colors disabled:opacity-50"
-              >
-                {loading ? 'Sending OTP...' : 'Send OTP'}
-              </button>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-green-600 mb-2">
-                  <CheckCircle className="w-5 h-5" />
-                  <span>OTP Sent Successfully</span>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Enter 6-digit OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  maxLength="6"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
-                />
-                <button
-                  onClick={handleVerifyOTP}
-                  disabled={loading || otp.length !== 6}
-                  className="bg-sky-600 text-white px-6 py-2 rounded-lg hover:bg-sky-700 transition-colors disabled:opacity-50"
-                >
-                  {loading ? 'Verifying...' : 'Verify OTP'}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-        </div>
-      )}
+      {error && <div className="text-red-500">{error}</div>}
     </div>
   );
 };

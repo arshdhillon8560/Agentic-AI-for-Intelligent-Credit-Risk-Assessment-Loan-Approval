@@ -6,7 +6,7 @@ def normalize(name):
     if not name:
         return ""
 
-    if not isinstance(name, str):  # 🔥 fix crash
+    if not isinstance(name, str): 
         name = str(name)
 
     name = name.lower()
@@ -34,7 +34,7 @@ def check_document_consistency(profile, financial, parsed):
     if profile_name and bank_name and profile_name not in bank_name:
         return False, "Name mismatch in bank statement"
 
-    # 🔥 FIXED salary check (no false rejection)
+    #FIXED salary check (no false rejection)
     if salary_name and len(salary_name.split()) > 1:
         if profile_name not in salary_name:
             return False, "Name mismatch in salary slip"

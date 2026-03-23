@@ -63,12 +63,12 @@ export const Dashboard = () => {
           {/* LEFT - LOGO */}
           <div className="flex items-center gap-3">
             <img
-              src="/src/assets/virtusa_logo.png"
+              src="/src/assets/favicon.png"
               alt="Virtusa"
               className="h-8"
             />
-            <h2 className="font-semibold text-slate-700 hidden md:block">
-              Loan Dashboard
+            <h2 className="font-semibold text-primary hidden md:block ">
+              Dashboard
             </h2>
           </div>
 

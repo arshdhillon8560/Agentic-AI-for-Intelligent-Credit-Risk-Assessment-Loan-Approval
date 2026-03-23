@@ -17,7 +17,7 @@ def safe(data, key, default):
     return default if value is None else value
 
 
-# ---------------- CREDIT MODEL ----------------
+
 
 def get_credit_score(data):
 
@@ -61,8 +61,6 @@ def get_credit_score(data):
             "risk_band": "MEDIUM"
         }
 
-
-# ---------------- FRAUD MODEL ----------------
 
 def get_fraud_score(data):
 

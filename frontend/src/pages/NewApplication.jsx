@@ -110,12 +110,26 @@ export const NewApplication = () => {
     return await kycAPI.sendOTP(data);
   };
 
-  const handleVerifyOTP = async (data) => {
-    await kycAPI.verifyOTP(data);
-    setTimeout(() => {
-      navigate(`/status/${applicationId}`);
-    }, 2000);
+ const handleVerifyOTP = async (data) => {
+  await kycAPI.verifyOTP(data);
+
+  const pollStatus = async () => {
+    try {
+      const res = await applicationAPI.getStatus(applicationId);
+
+      if (res.status === 'APPROVED' || res.status === 'REJECTED') {
+        navigate(`/status/${applicationId}`);
+      } else {
+        setTimeout(pollStatus, 2000);
+      }
+
+    } catch {
+      setTimeout(pollStatus, 2000);
+    }
   };
+
+  pollStatus();
+};
 
   const handleLogout = () => {
     logout();
@@ -173,44 +187,44 @@ export const NewApplication = () => {
         </div>
 
         {/* STEPPER */}
-        <div className="mb-10">
-          <div className="flex items-center justify-between">
-            {steps.map((step, index) => (
-              <div key={index} className="flex items-center flex-1">
+        <div className="mb-12">
+  <div className="flex items-center justify-between relative">
 
-                <div className="flex flex-col items-center flex-1">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      index < currentStep
-                        ? 'bg-green-500 text-white'
-                        : index === currentStep
-                        ? 'bg-sky-600 text-white'
-                        : 'bg-slate-200 text-slate-500'
-                    }`}
-                  >
-                    {index < currentStep
-                      ? <CheckCircle size={18} />
-                      : index + 1}
-                  </div>
+    {steps.map((step, index) => (
+      <div key={index} className="flex flex-col items-center flex-1 relative">
 
-                  <span className="text-xs mt-2 text-slate-600 text-center">
-                    {step}
-                  </span>
-                </div>
-
-                {index < steps.length - 1 && (
-                  <div
-                    className={`h-1 flex-1 mx-2 ${
-                      index < currentStep
-                        ? 'bg-green-500'
-                        : 'bg-slate-200'
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
+        {/* LINE (drawn behind circles) */}
+        {index !== 0 && (
+          <div className="absolute top-5 left-[-50%] w-full h-[2px]">
+            <div className="w-full h-full bg-slate-200 rounded" />
+            {index <= currentStep && (
+              <div className="absolute inset-0 bg-green-500 rounded" />
+            )}
           </div>
+        )}
+
+        {/* CIRCLE */}
+        <div
+          className={`w-10 h-10 rounded-full flex items-center justify-center z-10 ${
+            index < currentStep
+              ? 'bg-green-500 text-white'
+              : index === currentStep
+              ? 'bg-sky-600 text-white'
+              : 'bg-slate-200 text-slate-500'
+          }`}
+        >
+          {index < currentStep ? <CheckCircle size={18} /> : index + 1}
         </div>
+
+        {/* LABEL */}
+        <span className="text-xs mt-3 text-slate-600 text-center max-w-[110px] leading-tight">
+          {step}
+        </span>
+      </div>
+    ))}
+
+  </div>
+</div>
 
         {/* ERROR */}
         {error && (

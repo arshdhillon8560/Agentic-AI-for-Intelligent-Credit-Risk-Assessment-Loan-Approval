@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 
 const { createUser, findUserByEmail } = require("../models/userModel");
 
-// ✅ SIGNUP
+
 exports.signup = async (req, res) => {
   try {
     const { full_name, email, password, phone_number } = req.body;
@@ -41,7 +41,7 @@ exports.signup = async (req, res) => {
 };
 
 
-// ✅ LOGIN (IMPORTANT FIX)
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -58,7 +58,7 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: "Invalid password" });
     }
 
-    // ✅ IMPROVED TOKEN
+   
     const token = jwt.sign(
       {
         id: user.id,

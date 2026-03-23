@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock } from 'lucide-react';
 
 import bgImage from '../assets/background_man.png';
 import logo from '../assets/virtusa_logo.png';
@@ -13,7 +13,6 @@ export const Login = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -41,41 +40,60 @@ export const Login = () => {
   };
 
   return (
-    <div className="h-screen w-full flex overflow-hidden">
+    <div className="min-h-screen bg-white">
 
-      {/* LEFT IMAGE */}
-      <div className="hidden lg:flex w-1/2 h-full relative">
-        <img src={bgImage} className="w-lg h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/20 to-[#0f3b53]" />
-      </div>
+      {/* HEADER */}
+      <header className="flex items-center justify-between px-8 py-6">
+        <img src={logo} className="h-8" alt="logo" />
 
-      {/* RIGHT SIDE */}
-      <div className="flex-1 flex flex-col h-full">
+        <nav className="w-lg hidden md:flex gap-16 text-slate-700 font-medium">
+          <span className="hover:text-[#0f3b53] cursor-pointer">Home</span>
+          <span className="hover:text-[#0f3b53] cursor-pointer">About Us</span>
+          <span className="hover:text-[#0f3b53] cursor-pointer">Support</span>
+        </nav>
 
-        {/* HEADER */}
-        <header className="flex items-center justify-between px-8 py-6">
-          <img src={logo} className="h-8" />
-          <nav className="hidden md:flex gap-8 text-slate-700 font-medium">
-            <span className="hover:text-sky-600 cursor-pointer">Home</span>
-            <span className="hover:text-sky-600 cursor-pointer">About Us</span>
-            <span className="hover:text-sky-600 cursor-pointer">Support</span>
-          </nav>
-          <Link to="/signup" className="font-semibold">Login/SignUp</Link>
-        </header>
+        <Link to="/signup" className="font-semibold">
+          Login/Signup
+        </Link>
+      </header>
 
-        {/* FORM */}
-        <div className="flex flex-1 items-center justify-center px-6">
+      {/* MAIN */}
+      <div className="relative flex h-[calc(100vh-80px)] overflow-hidden">
 
-          <div className="w-[400px] max-h-[90vh] bg-white rounded-3xl shadow-xl p-8">
+        {/* FULL SCREEN GRADIENT (MAIN FIX) */}
+        <div className="absolute inset-0
+          bg-gradient-to-r 
+          from-white 
+          via-[#133950] 
+          to-[#002841]" 
+        />
 
+        {/* LEFT IMAGE */}
+        <div className="w-1/2  flex items-center justify-center relative z-10">
+          <img
+            src={bgImage}
+            alt="man"
+            className="h-[800px] object-contain"
+          />
+        </div>
+
+        {/* RIGHT CONTENT */}
+        <div className="flex-1 flex items-center justify-center relative z-10 px-6">
+
+          {/* CARD */}
+          <div className="w-[480px] bg-[#f3f4f6] rounded-3xl shadow-xl p-12">
+
+            {/* ICON */}
             <div className="flex justify-center mb-6">
-              <div className="w-20 h-20 bg-slate-200 rounded-2xl flex items-center justify-center">
-                <img src={icon} className="w-10 h-10" />
+              <div className="w-20 h-20 bg-gray-300 rounded-2xl flex items-center justify-center">
+                <img src={icon} alt="icon" className="w-lg h-lg" />
               </div>
             </div>
 
             <h1 className="text-3xl font-bold text-center">Welcome Back</h1>
-            <p className="text-center text-slate-500 mb-6">Sign in to your account</p>
+            <p className="text-center text-gray-600 mb-6">
+              Sign in to your account
+            </p>
 
             {error && (
               <div className="bg-red-50 text-red-600 p-2 rounded mb-3 text-sm">
@@ -83,58 +101,55 @@ export const Login = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-4">
 
               <div className="relative">
-                <Mail className="absolute left-3 top-3 text-gray-400" size={18} />
+                <Mail className="absolute left-3 top-3 text-gray-500" size={18} />
                 <input
                   type="email"
                   name="email"
                   placeholder="Email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-10 py-3 border rounded-lg"
+                  className="w-full pl-10 py-3 border border-gray-300 rounded-lg bg-white"
                   required
                 />
               </div>
 
               <div className="relative">
-                <Lock className="absolute left-3 top-3 text-gray-400" size={18} />
+                <Lock className="absolute left-3 top-3 text-gray-500" size={18} />
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type="password"
                   name="password"
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-10 py-3 border rounded-lg"
+                  className="w-full pl-10 py-3 border border-gray-300 rounded-lg bg-white"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-
-              <div className="text-right text-sm text-gray-500">
+                <div className="text-right text-sm text-gray-600">
                 Forgot Password?
               </div>
+              </div>
+
+              
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#0f3b53] text-white py-3 rounded-lg"
+                className="w-full bg-[#002841] text-white py-3 rounded-lg"
               >
                 {loading ? 'Signing In...' : 'Sign In'}
               </button>
             </form>
 
-            <p className="text-center mt-4 text-sm">
+            <p className="text-center mt-5 text-sm text-gray-700">
               Don’t have an account?{' '}
-              <Link to="/signup" className="font-semibold">Sign Up</Link>
+              <Link to="/signup" className="font-semibold text-[#002841]">
+                Sign Up
+              </Link>
             </p>
+
           </div>
         </div>
       </div>
