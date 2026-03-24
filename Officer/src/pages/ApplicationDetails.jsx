@@ -35,7 +35,7 @@ export const ApplicationDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-sky-50 to-slate-200">
+    <div className="min-h-screen bg-linear-to-br from-slate-100 via-sky-50 to-slate-200">
       <Navbar />
 
       <div className="max-w-6xl mx-auto p-8 space-y-6">
