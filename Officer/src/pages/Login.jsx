@@ -82,7 +82,7 @@ export const Login = () => {
         <div className="flex-1 flex items-center justify-center relative z-10 px-6">
 
           {/* CARD */}
-          <div className="w-[420px] bg-white/90 backdrop-blur rounded-3xl shadow-2xl p-10">
+          <div className="w-[420px] bg-white/90 backdrop-blur rounded-3xl shadow-2xl p-12">
 
             {/* ICON */}
             <div className="flex justify-center mb-6">

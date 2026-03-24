@@ -83,13 +83,17 @@ export const Dashboard = () => {
               New Application
             </button>
 
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-slate-700 hover:text-red-600 transition"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
+           <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl 
+             bg-red-500 text-white font-medium 
+             shadow-md transition-all duration-200 
+             hover:bg-red-600 hover:shadow-lg 
+             active:scale-95"
+        >
+          <LogOut size={18} />
+          Logout
+        </button>
 
           </div>
         </div>
