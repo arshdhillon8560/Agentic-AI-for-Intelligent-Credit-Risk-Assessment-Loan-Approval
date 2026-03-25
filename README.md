@@ -509,13 +509,22 @@ POST /auth/signup
 Content-Type: application/json
 
 {
+  "full_name": "John Doe",
   "email": "user@example.com",
   "password": "securepassword",
-  "fullName": "John Doe",
-  "userType": "applicant"
+  "phone_number": "+91-9876543210"
 }
 
-Response: { token, user }
+Response: 
+{
+  "message": "Signup successful",
+  "token": "jwt_token_here",
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "role": "applicant"
+  }
+}
 ```
 
 **Login**
@@ -528,7 +537,16 @@ Content-Type: application/json
   "password": "securepassword"
 }
 
-Response: { token, user }
+Response:
+{
+  "message": "Login successful",
+  "token": "jwt_token_here",
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "role": "applicant"
+  }
+}
 ```
 
 ### Loan Application (`/application`)
@@ -540,9 +558,15 @@ Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "loanAmount": 500000,
-  "tenure": 60,
-  "loanPurpose": "Home Purchase"
+  "loan_amount": 500000,
+  "loan_tenure": 60,
+  "loan_purpose": "Home Purchase"
+}
+
+Response:
+{
+  "message": "Application created successfully",
+  "application_id": "APP-20260325-001"
 }
 ```
 
@@ -553,9 +577,23 @@ Authorization: Bearer <token>
 Content-Type: application/json
 
 {
+  "application_id": "APP-20260325-001",
+  "name": "John Doe",
   "age": 35,
-  "pan": "ABCDE1234F",
-  "aadhar": "123456789012"
+  "date_of_birth": "1990-09-15",
+  "gender": "Male",
+  "marital_status": "Married",
+  "pan_number": "ABCDE1234F",
+  "aadhaar_number": "123456789012",
+  "address": "123 Main Street",
+  "city": "Mumbai",
+  "state": "Maharashtra",
+  "pincode": "400001"
+}
+
+Response:
+{
+  "message": "Applicant profile saved successfully"
 }
 ```
 
@@ -566,10 +604,20 @@ Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "company": "Tech Corp",
-  "designation": "Senior Developer",
-  "salary": 75000,
-  "workingYears": 5
+  "application_id": "APP-20260325-001",
+  "employment_type": "Salaried",
+  "employer_name": "Tech Corp Ltd",
+  "industry": "Technology",
+  "job_title": "Senior Developer",
+  "years_in_current_job": 5,
+  "total_work_experience": 10,
+  "monthly_income": 75000,
+  "salary_mode": "Bank Transfer"
+}
+
+Response:
+{
+  "message": "Employment details saved successfully"
 }
 ```
 
@@ -580,10 +628,20 @@ Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "existingLoans": 200000,
-  "emiAmount": 5000,
-  "creditCardUsage": 50000,
-  "bankBalance": 750000
+  "application_id": "APP-20260325-001",
+  "existing_loans": 200000,
+  "existing_emi": 5000,
+  "credit_card_limit": 100000,
+  "credit_card_balance": 50000,
+  "bank_name": "HDFC Bank",
+  "bank_account_type": "Savings",
+  "bank_account_number": "1234567890",
+  "average_monthly_balance": 750000
+}
+
+Response:
+{
+  "message": "Financial details saved successfully"
 }
 ```
 
@@ -593,26 +651,149 @@ POST /application/upload-documents
 Authorization: Bearer <token>
 Content-Type: multipart/form-data
 
-Files:
-- bankStatement (PDF)
-- salarySilp (PDF)
-- itrDocument (PDF)
+Body (multipart):
+- application_id: "APP-20260325-001"
+- bank_statement: <file> (PDF)
+- salary_slip: <file> (PDF)
+- itr_document: <file> (PDF)
+
+Response:
+{
+  "message": "Documents uploaded successfully",
+  "bank_statement_url": "https://cloudinary.com/...",
+  "salary_slip_url": "https://cloudinary.com/...",
+  "itr_document_url": "https://cloudinary.com/..."
+}
+```
+
+**Get All User Applications**
+```http
+GET /application/all
+Authorization: Bearer <token>
+
+Response:
+[
+  {
+    "application_id": "APP-20260325-001",
+    "status": "PROCESSING",
+    "kyc_status": "VERIFIED",
+    "created_at": "2026-03-25T10:30:00Z"
+  },
+  ...
+]
 ```
 
 **Process Application**
 ```http
 POST /application/process
 Authorization: Bearer <token>
+Content-Type: application/json
 
-Response: { status, decision, scores, message }
+{
+  "application_id": "APP-20260325-001"
+}
+
+Response: 
+{
+  "status": "processed",
+  "decision": "APPROVED/REJECTED/ESCALATED",
+  "scores": { ... },
+  "message": "Application processed successfully"
+}
 ```
 
 **Get Application Status**
 ```http
-GET /application/status/<applicationId>
+GET /application/status/:id
 Authorization: Bearer <token>
 
-Response: { applicationData, decision, agentResults }
+Response:
+{
+  "application_id": "APP-20260325-001",
+  "status": "ESCALATED",
+  "kyc_status": "VERIFIED",
+  "reason": null,
+  "created_at": "2026-03-25T10:30:00Z",
+  "credit_pd_score": 0.35,
+  "fraud_probability": 0.05,
+  "employment_verified": true,
+  "final_decision": "ESCALATED",
+  "user_message": "Your application is under review by credit officer",
+  "agent_scores": {
+    "credit_pd_score": 0.35,
+    "fraud_probability": 0.05,
+    "employment_verified": true,
+    "final_decision": "ESCALATED"
+  }
+}
+```
+
+### KYC Verification (`/kyc`)
+
+**Verify PAN**
+```http
+POST /kyc/verify-pan
+Content-Type: application/json
+
+{
+  "application_id": "APP-20260325-001",
+  "pan": "ABCDE1234F",
+  "name": "John Doe",
+  "dob": "1990-09-15"
+}
+
+Response:
+{
+  "message": "PAN verification successful",
+  "data": {
+    "status": "valid",
+    ...
+  }
+}
+// On failure:
+{
+  "message": "PAN verification failed",
+  "application_status": "REJECTED"
+}
+```
+
+**Send Aadhaar OTP**
+```http
+POST /kyc/aadhaar/send-otp
+Content-Type: application/json
+
+{
+  "aadhaar": "123456789012"
+}
+
+Response:
+{
+  "reference_id": "ref_12345",
+  "message": "OTP sent successfully"
+}
+```
+
+**Verify Aadhaar OTP**
+```http
+POST /kyc/aadhaar/verify-otp
+Content-Type: application/json
+
+{
+  "application_id": "APP-20260325-001",
+  "reference_id": "ref_12345",
+  "otp": "123456"
+}
+
+Response (on success):
+{
+  "message": "KYC successful",
+  "orchestrator": { ... }
+}
+// On failure:
+{
+  "message": "Aadhaar verification failed",
+  "application_status": "REJECTED"
+}
 ```
 
 ### Officer Routes (`/officer`)
@@ -622,29 +803,70 @@ Response: { applicationData, decision, agentResults }
 GET /officer/escalated
 Authorization: Bearer <officer-token>
 
-Response: [ { applicationId, applicantName, status, ... } ]
+Response:
+{
+  "count": 5,
+  "applications": [
+    {
+      "application_id": "APP-20260325-001",
+      "user_id": 1,
+      "loan_amount": 500000,
+      "loan_tenure": 60,
+      "loan_purpose": "Home Purchase",
+      "created_at": "2026-03-25T10:30:00Z"
+    },
+    ...
+  ]
+}
 ```
 
 **Get Application Details**
 ```http
-GET /officer/application/<applicationId>
+GET /officer/application/:id
 Authorization: Bearer <officer-token>
+
+Response:
+{
+  "application": { ... },
+  "profile": { ... },
+  "employment": { ... },
+  "financial": { ... },
+  "documents": { ... },
+  "agent_result": { ... }
+}
 ```
 
-**Make Decision**
+**Make Officer Decision**
 ```http
 POST /officer/decision
 Authorization: Bearer <officer-token>
 Content-Type: application/json
 
 {
-  "applicationId": "APP-XXX",
-  "decision": "APPROVED",  // or REJECTED
-  "notes": "Good income, stable employment"
+  "application_id": "APP-20260325-001",
+  "decision": "APPROVED",
+  "reason": "Good income, stable employment"
+}
+
+Response:
+{
+  "message": "Decision updated successfully",
+  "application_id": "APP-20260325-001",
+  "status": "APPROVED",
+  "reason": "Good income, stable employment"
 }
 ```
 
-### ML APIs (`/`)
+### ML APIs (Port 8000)
+
+**Health Check**
+```http
+GET /
+Response:
+{
+  "message": "ML Agents API is running"
+}
+```
 
 **Credit Risk Prediction**
 ```http
@@ -653,14 +875,26 @@ Content-Type: application/json
 
 {
   "age": 35,
-  "income": 75000,
-  "existingLoans": 200000,
-  "debtToIncomeRatio": 0.27,
-  "creditUtilization": 0.35,
-  "balanceStability": 0.8
+  "monthly_income": 75000,
+  "existing_emi": 5000,
+  "credit_card_balance": 50000,
+  "credit_card_limit": 100000,
+  "number_of_existing_loans": 2,
+  "years_in_job": 5,
+  "credit_history_length": 10,
+  "late_payments": 0,
+  "total_payments": 60,
+  "loan_amount": 500000,
+  "loan_tenure": 60,
+  "account_balance": 750000,
+  "bank_balance_history": [750000, 725000, 700000, ...]
 }
 
-Response: { pd_score: 0.35, risk_band: "LOW" }
+Response:
+{
+  "pd_score": 0.35,
+  "risk_band": "LOW"
+}
 ```
 
 **Fraud Detection**
@@ -669,12 +903,21 @@ POST /predict-fraud
 Content-Type: application/json
 
 {
-  "incomeMismatch": 0.1,
-  "locationAnomaly": 0.05,
-  "accountVolatility": 0.15
+  "income_declared": 75000,
+  "income_detected": 72000,
+  "address_mismatch": 0,
+  "device_location": 0,
+  "document_authenticity_score": 0.95,
+  "employment_mismatch": 0,
+  "rapid_loan_requests": 0,
+  "bank_balance_history": [750000, 725000, 700000, ...]
 }
 
-Response: { fraud_probability: 0.08 }
+Response:
+{
+  "fraud_probability": 0.08,
+  "fraud_flag": false
+}
 ```
 
 ---
@@ -696,66 +939,79 @@ Response: { fraud_probability: 0.08 }
 
 **applications**
 ```sql
-- application_id (PK)
+- id (PK)
+- application_id (UNIQUE)
 - user_id (FK)
 - loan_amount
-- tenure_months
+- loan_tenure
 - loan_purpose
 - status (PENDING, IN_REVIEW, ESCALATED, APPROVED, REJECTED)
-- decision
+- kyc_status
+- reason
 - created_at
 - updated_at
 ```
 
 **applicant_profiles**
 ```sql
-- profile_id (PK)
+- id (PK)
 - application_id (FK)
+- name
 - age
-- pan
-- aadhar
 - date_of_birth
+- gender
+- marital_status
+- pan_number
+- aadhaar_number
+- address
+- city
+- state
+- pincode
 ```
 
 **employment_details**
 ```sql
-- employment_id (PK)
+- id (PK)
 - application_id (FK)
-- company_name
-- designation
-- monthly_salary
-- working_years
 - employment_type
+- employer_name
+- industry
+- job_title
+- years_in_current_job
+- total_work_experience
+- monthly_income
+- salary_mode
 ```
 
 **financial_details**
 ```sql
-- financial_id (PK)
+- id (PK)
 - application_id (FK)
 - existing_loans
-- monthly_emi
-- credit_card_usage
-- bank_balance
-- monthly_income
+- existing_emi
+- credit_card_limit
+- credit_card_balance
+- bank_name
+- bank_account_type
+- average_monthly_balance
+- bank_account_number
 ```
 
 **documents**
 ```sql
-- document_id (PK)
+- id (PK)
 - application_id (FK)
-- document_type (bank_statement, salary_slip, itr)
-- cloudinary_url
+- bank_statement_url
+- salary_slip_url
+- itr_document_url
 - uploaded_at
 ```
 
 **agent_results**
 ```sql
-- result_id (PK)
+- id (PK)
 - application_id (FK)
-- ocr_data (JSON)
-- parsed_data (JSON)
-- validation_results (JSON)
-- credit_score
+- credit_pd_score
 - fraud_probability
 - employment_verified
 - final_decision
