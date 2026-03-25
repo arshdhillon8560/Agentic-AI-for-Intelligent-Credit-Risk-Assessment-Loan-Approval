@@ -696,66 +696,79 @@ Response: { fraud_probability: 0.08 }
 
 **applications**
 ```sql
-- application_id (PK)
+- id (PK)
+- application_id (UNIQUE)
 - user_id (FK)
 - loan_amount
-- tenure_months
+- loan_tenure
 - loan_purpose
 - status (PENDING, IN_REVIEW, ESCALATED, APPROVED, REJECTED)
-- decision
+- kyc_status
+- reason
 - created_at
 - updated_at
 ```
 
 **applicant_profiles**
 ```sql
-- profile_id (PK)
+- id (PK)
 - application_id (FK)
+- name
 - age
-- pan
-- aadhar
 - date_of_birth
+- gender
+- marital_status
+- pan_number
+- aadhaar_number
+- address
+- city
+- state
+- pincode
 ```
 
 **employment_details**
 ```sql
-- employment_id (PK)
+- id (PK)
 - application_id (FK)
-- company_name
-- designation
-- monthly_salary
-- working_years
 - employment_type
+- employer_name
+- industry
+- job_title
+- years_in_current_job
+- total_work_experience
+- monthly_income
+- salary_mode
 ```
 
 **financial_details**
 ```sql
-- financial_id (PK)
+- id (PK)
 - application_id (FK)
 - existing_loans
-- monthly_emi
-- credit_card_usage
-- bank_balance
-- monthly_income
+- existing_emi
+- credit_card_limit
+- credit_card_balance
+- bank_name
+- bank_account_type
+- average_monthly_balance
+- bank_account_number
 ```
 
 **documents**
 ```sql
-- document_id (PK)
+- id (PK)
 - application_id (FK)
-- document_type (bank_statement, salary_slip, itr)
-- cloudinary_url
+- bank_statement_url
+- salary_slip_url
+- itr_document_url
 - uploaded_at
 ```
 
 **agent_results**
 ```sql
-- result_id (PK)
+- id (PK)
 - application_id (FK)
-- ocr_data (JSON)
-- parsed_data (JSON)
-- validation_results (JSON)
-- credit_score
+- credit_pd_score
 - fraud_probability
 - employment_verified
 - final_decision
