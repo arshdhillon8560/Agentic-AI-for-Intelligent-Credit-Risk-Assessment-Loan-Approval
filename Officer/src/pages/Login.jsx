@@ -67,7 +67,7 @@ export const Login = () => {
       <div className="flex flex-1 relative overflow-hidden">
 
         {/* BACKGROUND GRADIENT */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-[#133950] to-[#002841]" />
+        <div className="absolute inset-0 bg-linear-to-r from-white via-[#133950] to-[#002841]" />
 
         {/* LEFT IMAGE */}
         <div className="w-1/2 hidden lg:flex items-center justify-center relative z-10">

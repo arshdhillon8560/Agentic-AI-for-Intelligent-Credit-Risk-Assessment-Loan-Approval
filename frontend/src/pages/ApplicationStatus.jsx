@@ -60,13 +60,12 @@ export const ApplicationStatus = () => {
     }
   };
 
-  // ✅ FIXED FORMATTER (THIS IS THE MAIN FIX)
+  // ✅ FORMATTER (handles scientific values properly)
   const formatPercentage = (value) => {
     if (value == null) return "N/A";
 
     const percentage = value * 100;
 
-    // handle extremely small scientific values
     if (percentage > 0 && percentage < 0.000001) {
       return "< 0.000001%";
     }
@@ -74,14 +73,15 @@ export const ApplicationStatus = () => {
     return percentage.toFixed(6) + "%";
   };
 
-  // ✅ SAME LOGIC (unchanged)
+  // ✅ FIXED RISK LEVELS (based on your small-scale model output)
   const getRiskLevel = (val) => {
     if (val == null) return { label: "N/A", color: "text-slate-500" };
 
-    if (val >= 0.8) return { label: "VERY HIGH", color: "text-red-600" };
-    if (val >= 0.5) return { label: "HIGH", color: "text-red-500" };
-    if (val >= 0.2) return { label: "MEDIUM", color: "text-yellow-500" };
-    if (val >= 0.05) return { label: "LOW", color: "text-sky-500" };
+    if (val >= 1e-03) return { label: "VERY HIGH", color: "text-red-600" };
+    if (val >= 5e-04) return { label: "HIGH", color: "text-red-500" };
+    if (val >= 1e-04) return { label: "MEDIUM", color: "text-yellow-500" };
+    if (val >= 1e-06) return { label: "LOW", color: "text-sky-500" };
+
     return { label: "VERY LOW", color: "text-sky-600" };
   };
 
@@ -96,7 +96,8 @@ export const ApplicationStatus = () => {
   const pd = status?.agent_scores?.credit_pd_score ?? 0;
   const fraud = status?.agent_scores?.fraud_probability ?? 0;
 
-  const finalDecision = status?.agent_scores?.final_decision || status?.status;
+  const finalDecision =
+    status?.agent_scores?.final_decision || status?.status;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-sky-50 to-slate-200">
@@ -191,7 +192,9 @@ export const ApplicationStatus = () => {
 
               {/* FRAUD */}
               <div className="p-6 rounded-xl bg-slate-50 border">
-                <p className="text-sm text-slate-500 mb-2">Fraud Probability</p>
+                <p className="text-sm text-slate-500 mb-2">
+                  Fraud Probability
+                </p>
 
                 <div className="flex justify-between items-center">
                   <span className="text-2xl font-bold">
@@ -217,7 +220,9 @@ export const ApplicationStatus = () => {
 
               {/* EMPLOYMENT */}
               <div className="p-6 rounded-xl bg-slate-50 border text-center">
-                <p className="text-sm text-slate-500">Employment Verified</p>
+                <p className="text-sm text-slate-500">
+                  Employment Verified
+                </p>
                 <p
                   className={`text-xl font-bold ${
                     status.agent_scores.employment_verified
