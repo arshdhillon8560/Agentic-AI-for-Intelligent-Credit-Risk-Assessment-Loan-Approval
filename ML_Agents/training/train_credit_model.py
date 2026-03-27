@@ -22,25 +22,33 @@ from xgboost import XGBClassifier
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
 # Load dataset
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 data_path = os.path.join(BASE_DIR, "datasets", "loan_credit_pd_dataset_50k.csv")
 
 data = pd.read_csv(data_path)
 
+
 # Features & Target
 X = data.drop(["pd_score", "default"], axis=1)
 y = data["default"]
 
+
 # Train-Test Split
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
 )
+
 
 # Scaling
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
+
 
 # Models
 models = {
@@ -62,8 +70,10 @@ models = {
     )
 }
 
+
 best_model = None
 best_score = 0
+
 
 # Training & Evaluation
 for name, model in models.items():
@@ -98,7 +108,7 @@ for name, model in models.items():
 
     # OPTIONAL: Plot Confusion Matrix
     plt.figure()
-    sns.heatmap(cm, annot=True, fmt="d")
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
     plt.title(f"Confusion Matrix - {name}")
@@ -108,6 +118,7 @@ for name, model in models.items():
     if auc > best_score:
         best_score = auc
         best_model = model
+
 
 # Save model & scaler
 models_dir = os.path.join(BASE_DIR, "models")
