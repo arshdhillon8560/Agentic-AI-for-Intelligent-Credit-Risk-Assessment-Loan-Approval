@@ -1053,11 +1053,12 @@ Response:
 
 **Selected Model:** LogisticRegression (Best AUC and highest precision/recall balance)
 
-**Confusion Matrix (LogisticRegression):**
+**Confusion Matrix:**
 ```
-              Predicted No Default    Predicted Default
-Actual No Default:      8171                    2
-Actual Default:           16                 1811
+<img width="640" height="480" alt="Credit_model_RandomForest" src="https://github.com/user-attachments/assets/723f4aa6-393c-4e2d-8b56-b170e5739dc8" />
+<img width="640" height="480" alt="Credit_model_LogisticRegression" src="https://github.com/user-attachments/assets/964eb9bc-2754-4cee-b466-8a4100251ac2" />
+<img width="640" height="480" alt="Credit_model_XBoost" src="https://github.com/user-attachments/assets/e8ce3582-df89-497a-bd1a-c41137b34e77" />
+  
 ```
 
 ### Fraud Detection Model (XGBoost - Best Performer)
@@ -1082,11 +1083,11 @@ Actual Default:           16                 1811
 
 **Selected Model:** XGBoost (Highest accuracy, precision, and F1 score; excellent fraud detection)
 
-**Confusion Matrix (XGBoost):**
+**Confusion Matrix:**
 ```
-              Predicted Non-Fraud    Predicted Fraud
-Actual Non-Fraud:    9873                    17
-Actual Fraud:           26                   84
+<img width="640" height="480" alt="Fraud_model_RandomForest" src="https://github.com/user-attachments/assets/a467a644-4a24-4cb6-bae3-23fd374a3d50" />
+<img width="640" height="480" alt="Fraud_model_XBoost" src="https://github.com/user-attachments/assets/1a9b3387-3876-4e03-ab66-ada6fcb0882f" />
+
 ```
 
 ### Training Data
