@@ -1022,7 +1022,7 @@ Response:
 
 ## 🧠 Machine Learning Models
 
-### Credit Risk Model (XGBoost)
+### Credit Risk Model (LogisticRegression - Best Performer)
 
 **Input Features:**
 - Age
@@ -1043,7 +1043,24 @@ Response:
 - PD 0.4-0.6 → ESCALATE
 - PD < 0.4 → APPROVE (if other checks pass)
 
-### Fraud Detection Model
+**Model Performance Comparison (Trained on 10,000 test samples):**
+
+| Model | Accuracy | AUC | Precision | Recall | F1 Score |
+|-------|----------|-----|-----------|--------|----------|
+| RandomForest | 97.71% | 0.9973 | 0.9756 | 0.8971 | 0.9347 |
+| **LogisticRegression** | **99.82%** | **1.0000** | **0.9989** | **0.9912** | **0.9951** |
+| XGBoost | 99.09% | 0.9996 | 0.9838 | 0.9661 | 0.9749 |
+
+**Selected Model:** LogisticRegression (Best AUC and highest precision/recall balance)
+
+**Confusion Matrix (LogisticRegression):**
+```
+              Predicted No Default    Predicted Default
+Actual No Default:      8171                    2
+Actual Default:           16                 1811
+```
+
+### Fraud Detection Model (XGBoost - Best Performer)
 
 **Input Features:**
 - Income mismatch percentage
@@ -1056,9 +1073,26 @@ Response:
 - Fraud Probability: 0-1
 - Decision: > 0.7 → REJECT
 
+**Model Performance Comparison (Trained on 10,000 test samples):**
+
+| Model | Accuracy | AUC | Precision | Recall | F1 Score |
+|-------|----------|-----|-----------|--------|----------|
+| RandomForest | 99.44% | 0.9985 | 0.8140 | 0.6364 | 0.7143 |
+| **XGBoost** | **99.57%** | **0.9987** | **0.8317** | **0.7636** | **0.7962** |
+
+**Selected Model:** XGBoost (Highest accuracy, precision, and F1 score; excellent fraud detection)
+
+**Confusion Matrix (XGBoost):**
+```
+              Predicted Non-Fraud    Predicted Fraud
+Actual Non-Fraud:    9873                    17
+Actual Fraud:           26                   84
+```
+
 ### Training Data
 - Credit Model: 50k+ loan records with 20+ financial features
 - Fraud Model: 50k+ records with labeled fraud/non-fraud cases
+- Test Set: 10,000 samples for each model evaluation
 
 ---
 
