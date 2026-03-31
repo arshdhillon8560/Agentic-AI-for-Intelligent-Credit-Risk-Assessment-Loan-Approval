@@ -6,6 +6,7 @@ import { Signup } from './pages/Signup';
 import { Dashboard } from './pages/Dashboard';
 import { ApplicationStatus } from './pages/ApplicationStatus';
 import { NewApplication } from './pages/NewApplication';
+import {KYCPage} from '../src/pages/KYCPage'
 
 function App() {
   return (
@@ -42,6 +43,17 @@ function App() {
       />
 
       <Route path="/" element={<Navigate to="/login" replace />} />
+
+      <Route
+        path="/kyc/:id"
+        element={
+          <ProtectedRoute>
+            <KYCPage />
+          </ProtectedRoute>
+        }
+      />
+
+    
 
     </Routes>
   );

@@ -11,7 +11,7 @@ export const useAuth = () => {
   return context;
 };
 
-// ✅ helper to decode JWT
+
 const decodeToken = (token) => {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -30,14 +30,12 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       const decoded = decodeToken(token);
 
-      console.log("DECODED USER:", decoded); // ✅ DEBUG
-
-      setUser(decoded); // ✅ store full user (id, email, role)
+      setUser(decoded);
     }
     setLoading(false);
   }, [token]);
 
-  // ✅ LOGIN
+
   const login = async (credentials) => {
     const data = await authAPI.login(credentials);
 
@@ -50,7 +48,7 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  // ✅ SIGNUP
+
   const signup = async (userData) => {
     const data = await authAPI.signup(userData);
 
@@ -65,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  // ✅ LOGOUT
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('appId');

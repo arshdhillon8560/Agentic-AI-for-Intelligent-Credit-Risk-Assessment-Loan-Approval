@@ -327,3 +327,49 @@ exports.getUserApplications = async (req, res) => {
     res.status(500).json(err);
   }
 };
+
+exports.getKYCDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await db.query(
+      `SELECT 
+        a.application_id,
+        a.kyc_status,
+
+        ap.name,
+        ap.date_of_birth,
+        ap.pan_number,
+        ap.aadhaar_number
+
+      FROM applications a
+
+      LEFT JOIN applicant_profiles ap
+      ON ap.application_id = a.application_id
+
+      WHERE a.application_id = $1`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    const data = result.rows[0];
+
+    res.json({
+      application_id: data.application_id,
+      kyc_status: data.kyc_status,
+      profile: {
+        name: data.name,
+        date_of_birth: data.date_of_birth,
+        pan_number: data.pan_number,
+        aadhaar_number: data.aadhaar_number,
+      },
+    });
+
+  } catch (error) {
+    console.error("KYC DETAILS ERROR:", error);
+    res.status(500).json(error);
+  }
+};

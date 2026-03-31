@@ -24,15 +24,19 @@ export const ApplicationStatus = () => {
     let interval;
 
     const fetchData = async () => {
-      const data = await applicationAPI.getStatus(id);
+      try {
+        const data = await applicationAPI.getStatus(id);
 
-      console.log("API DATA:", data);
+        if (!data) return;
 
-      setStatus(data);
-      setLoading(false);
+        setStatus(data);
+        setLoading(false);
 
-      if (data.status === "APPROVED" || data.status === "REJECTED") {
-        clearInterval(interval);
+        if (data.status === "APPROVED" || data.status === "REJECTED") {
+          clearInterval(interval);
+        }
+      } catch (err) {
+        console.error("Error fetching status:", err);
       }
     };
 
@@ -60,7 +64,6 @@ export const ApplicationStatus = () => {
     }
   };
 
-  // ✅ FORMATTER (handles scientific values properly)
   const formatPercentage = (value) => {
     if (value == null) return "N/A";
 
@@ -73,7 +76,6 @@ export const ApplicationStatus = () => {
     return percentage.toFixed(6) + "%";
   };
 
-  // ✅ FIXED RISK LEVELS (based on your small-scale model output)
   const getRiskLevel = (val) => {
     if (val == null) return { label: "N/A", color: "text-slate-500" };
 
@@ -85,7 +87,7 @@ export const ApplicationStatus = () => {
     return { label: "VERY LOW", color: "text-sky-600" };
   };
 
-  if (loading) {
+  if (loading || !status) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <RefreshCw className="animate-spin text-sky-600" />
@@ -93,10 +95,8 @@ export const ApplicationStatus = () => {
     );
   }
 
-  const pd = status?.agent_scores?.credit_pd_score ?? 0;
-  const fraud = status?.agent_scores?.fraud_probability ?? 0;
-
-  const finalDecision =status?.status;
+  const pd = status.agent_scores?.credit_pd_score ?? 0;
+  const fraud = status.agent_scores?.fraud_probability ?? 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-sky-50 to-slate-200">
@@ -150,24 +150,38 @@ export const ApplicationStatus = () => {
             <p className="text-xl font-bold text-sky-600">
               {status.kyc_status}
             </p>
+
+            {/* ✅ KYC BUTTON FIXED */}
+            {status.kyc_status === "PENDING" && status.application_id && (
+              <button
+                onClick={() => navigate(`/kyc/${status.application_id}`)}
+                className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+              >
+                Complete KYC
+              </button>
+            )}
           </div>
         </div>
 
         {/* MESSAGE */}
         <div className="bg-white p-6 rounded-xl shadow mb-8">
           <p className="text-sm text-slate-500">Message</p>
-          <p className="font-semibold">{status.user_message}</p>
+          <p className="font-semibold">
+            {status.user_message || "No message available"}
+          </p>
         </div>
 
-        {/* ANALYTICS */}
+        {/* RISK ANALYSIS */}
         {status.agent_scores && (
           <div className="bg-white rounded-2xl shadow-lg p-8">
             <h2 className="text-xl font-bold mb-6">Risk Analysis</h2>
 
             <div className="grid md:grid-cols-2 gap-6">
-              {/* CREDIT PD */}
+              {/* CREDIT */}
               <div className="p-6 rounded-xl bg-slate-50 border">
-                <p className="text-sm text-slate-500 mb-2">Credit Risk (PD)</p>
+                <p className="text-sm text-slate-500 mb-2">
+                  Credit Risk (PD)
+                </p>
 
                 <div className="flex justify-between items-center">
                   <span className="text-2xl font-bold">
@@ -177,15 +191,6 @@ export const ApplicationStatus = () => {
                   <span className={`font-semibold ${getRiskLevel(pd).color}`}>
                     {getRiskLevel(pd).label}
                   </span>
-                </div>
-
-                <div className="mt-3 h-2 bg-slate-200 rounded">
-                  <div
-                    className="h-2 bg-sky-500 rounded"
-                    style={{
-                      width: `${Math.min(pd * 100, 100)}%`,
-                    }}
-                  />
                 </div>
               </div>
 
@@ -205,15 +210,6 @@ export const ApplicationStatus = () => {
                   >
                     {getRiskLevel(fraud).label}
                   </span>
-                </div>
-
-                <div className="mt-3 h-2 bg-slate-200 rounded">
-                  <div
-                    className="h-2 bg-red-400 rounded"
-                    style={{
-                      width: `${Math.min(fraud * 100, 100)}%`,
-                    }}
-                  />
                 </div>
               </div>
 
@@ -237,7 +233,7 @@ export const ApplicationStatus = () => {
               <div className="p-6 rounded-xl bg-slate-50 border text-center">
                 <p className="text-sm text-slate-500">Final Decision</p>
                 <p className="text-xl font-bold text-sky-600">
-                  {finalDecision}
+                  {status.status}
                 </p>
               </div>
             </div>

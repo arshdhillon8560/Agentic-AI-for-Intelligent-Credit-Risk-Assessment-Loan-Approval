@@ -12,7 +12,8 @@ const {
  uploadDocuments,
  processApplication,
  trackApplication,
- getUserApplications
+ getUserApplications,
+ getKYCDetails,
 } = require("../controllers/applicationController")
 
 // Protected routes
@@ -40,5 +41,7 @@ router.post(
 router.post("/process", authMiddleware, processApplication)
 
 router.get("/status/:id", authMiddleware, trackApplication)
+
+router.get("/kyc-details/:id", authMiddleware, getKYCDetails);
 
 module.exports = router

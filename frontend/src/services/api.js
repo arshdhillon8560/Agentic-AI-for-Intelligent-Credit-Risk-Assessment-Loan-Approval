@@ -1,11 +1,12 @@
 const API_BASE_URL = 'http://localhost:5000';
 
+
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
 
   return {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}` // ✅ always include
+    Authorization: `Bearer ${token}`
   };
 };
 
@@ -19,7 +20,7 @@ const handleResponse = async (response) => {
   return data;
 };
 
-// ================= AUTH =================
+
 export const authAPI = {
   signup: async (userData) => {
     const response = await fetch(`${API_BASE_URL}/auth/signup`, {
@@ -40,7 +41,7 @@ export const authAPI = {
   }
 };
 
-// ================= APPLICATION =================
+
 export const applicationAPI = {
   create: async (applicationData) => {
     const response = await fetch(`${API_BASE_URL}/application/create`, {
@@ -102,17 +103,28 @@ export const applicationAPI = {
     return handleResponse(response);
   },
 
-  // ✅ FIXED (IMPORTANT)
   getAll: async () => {
     const response = await fetch(`${API_BASE_URL}/application/all`, {
       headers: getAuthHeaders()
     });
 
     return handleResponse(response);
+  },
+
+
+  getApplicationDetails: async (id) => {
+    const response = await fetch(
+      `${API_BASE_URL}/application/kyc-details/${id}`,
+      {
+        headers: getAuthHeaders()
+      }
+    );
+
+    return handleResponse(response);
   }
 };
 
-// ================= KYC =================
+
 export const kycAPI = {
   verifyPAN: async (panData) => {
     const response = await fetch(`${API_BASE_URL}/kyc/verify-pan`, {
