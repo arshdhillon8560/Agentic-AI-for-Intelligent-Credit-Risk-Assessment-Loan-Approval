@@ -30,8 +30,24 @@ export const ApplicationDetails = () => {
     navigate("/dashboard");
   };
 
+  // ✅ SAFE DOCUMENT OPEN FUNCTION (NO about:blank ISSUE)
+  const openDocument = (url) => {
+    if (!url) {
+      alert("Document not ready yet");
+      return;
+    }
+
+    const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+    window.open(viewerUrl, "_blank");
+  };
+
   if (loading) {
     return <div className="text-center mt-10">Loading...</div>;
+  }
+
+  // EXTRA SAFETY (optional but recommended)
+  if (!data?.documents) {
+    return <div className="text-center mt-10">Loading documents...</div>;
   }
 
   const pd = data.agent_result?.credit_pd_score || 0;
@@ -67,33 +83,17 @@ export const ApplicationDetails = () => {
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <p>
-              <b>Name:</b> {data.profile?.name}
-            </p>
+            <p><b>Name:</b> {data.profile?.name}</p>
             <p>
               <b>DOB:</b>{" "}
-              {new Date(data.profile?.date_of_birth).toLocaleDateString(
-                "en-GB",
-              )}
+              {new Date(data.profile?.date_of_birth).toLocaleDateString("en-GB")}
             </p>
-            <p>
-              <b>Gender:</b> {data.profile?.gender}
-            </p>
-            <p>
-              <b>Marital:</b> {data.profile?.marital_status}
-            </p>
-            <p>
-              <b>PAN:</b> {data.profile?.pan_number}
-            </p>
-            <p>
-              <b>Aadhaar:</b> {data.profile?.aadhaar_number}
-            </p>
-            <p>
-              <b>City:</b> {data.profile?.city}
-            </p>
-            <p>
-              <b>State:</b> {data.profile?.state}
-            </p>
+            <p><b>Gender:</b> {data.profile?.gender}</p>
+            <p><b>Marital:</b> {data.profile?.marital_status}</p>
+            <p><b>PAN:</b> {data.profile?.pan_number}</p>
+            <p><b>Aadhaar:</b> {data.profile?.aadhaar_number}</p>
+            <p><b>City:</b> {data.profile?.city}</p>
+            <p><b>State:</b> {data.profile?.state}</p>
           </div>
         </div>
 
@@ -104,24 +104,12 @@ export const ApplicationDetails = () => {
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <p>
-              <b>Type:</b> {data.employment?.employment_type}
-            </p>
-            <p>
-              <b>Employer:</b> {data.employment?.employer_name}
-            </p>
-            <p>
-              <b>Job:</b> {data.employment?.job_title}
-            </p>
-            <p>
-              <b>Experience:</b> {data.employment?.total_work_experience}
-            </p>
-            <p>
-              <b>Income:</b> ₹{data.employment?.monthly_income}
-            </p>
-            <p>
-              <b>Salary Mode:</b> {data.employment?.salary_mode}
-            </p>
+            <p><b>Type:</b> {data.employment?.employment_type}</p>
+            <p><b>Employer:</b> {data.employment?.employer_name}</p>
+            <p><b>Job:</b> {data.employment?.job_title}</p>
+            <p><b>Experience:</b> {data.employment?.total_work_experience}</p>
+            <p><b>Income:</b> ₹{data.employment?.monthly_income}</p>
+            <p><b>Salary Mode:</b> {data.employment?.salary_mode}</p>
           </div>
         </div>
 
@@ -132,18 +120,10 @@ export const ApplicationDetails = () => {
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <p>
-              <b>Existing Loans:</b> {data.financial?.existing_loans}
-            </p>
-            <p>
-              <b>EMI:</b> ₹{data.financial?.existing_emi}
-            </p>
-            <p>
-              <b>Bank:</b> {data.financial?.bank_name}
-            </p>
-            <p>
-              <b>Balance:</b> ₹{data.financial?.average_monthly_balance}
-            </p>
+            <p><b>Existing Loans:</b> {data.financial?.existing_loans}</p>
+            <p><b>EMI:</b> ₹{data.financial?.existing_emi}</p>
+            <p><b>Bank:</b> {data.financial?.bank_name}</p>
+            <p><b>Balance:</b> ₹{data.financial?.average_monthly_balance}</p>
           </div>
         </div>
 
@@ -152,29 +132,40 @@ export const ApplicationDetails = () => {
           <h2 className="text-lg font-bold mb-4 text-primary">Documents</h2>
 
           <div className="flex flex-wrap gap-4">
-            <a
-              href={`https://docs.google.com/viewer?url=${data.documents?.bank_statement_url}&embedded=true`}
-              target="_blank"
-              className="bg-primary text-white px-4 py-2 rounded-lg"
+
+            <button
+              onClick={() => openDocument(data.documents?.bank_statement_url)}
+              className={`px-4 cursor-pointer py-2 rounded-lg ${
+                data.documents?.bank_statement_url
+                  ? "bg-primary text-white"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
             >
               View Bank Statement
-            </a>
+            </button>
 
-            <a
-              href={`https://docs.google.com/viewer?url=${data.documents?.salary_slip_url}&embedded=true`}
-              target="_blank"
-              className="bg-primary text-white px-4 py-2 rounded-lg"
+            <button
+              onClick={() => openDocument(data.documents?.salary_slip_url)}
+              className={`px-4 py-2 cursor-pointer rounded-lg ${
+                data.documents?.salary_slip_url
+                  ? "bg-primary text-white"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
             >
               View Salary Slip
-            </a>
+            </button>
 
-            <a
-              href={`https://docs.google.com/viewer?url=${data.documents?.itr_document_url}&embedded=true`}
-              target="_blank"
-              className="bg-primary-light text-white px-4 py-2 rounded-lg"
+            <button
+              onClick={() => openDocument(data.documents?.itr_document_url)}
+              className={`px-4 py-2 cursor-pointer rounded-lg ${
+                data.documents?.itr_document_url
+                  ? "bg-primary-light text-white"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
             >
               View ITR
-            </a>
+            </button>
+
           </div>
         </div>
 
@@ -184,26 +175,16 @@ export const ApplicationDetails = () => {
             AI Risk Analysis
           </h2>
 
-          {/* ORIGINAL CONTENT */}
           <div className="grid md:grid-cols-2 gap-4">
-            <p>
-              <b>Credit PD:</b> {pd}
-            </p>
-            <p>
-              <b>Fraud Risk:</b> {fraud}
-            </p>
-            <p>
-              <b>Employment Verified:</b> {emp ? "Yes" : "No"}
-            </p>
-            <p>
-              <b>AI Decision:</b> {data.agent_result?.final_decision}
-            </p>
+            <p><b>Credit PD:</b> {pd}</p>
+            <p><b>Fraud Risk:</b> {fraud}</p>
+            <p><b>Employment Verified:</b> {emp ? "Yes" : "No"}</p>
+            <p><b>AI Decision:</b> {data.agent_result?.final_decision}</p>
           </div>
 
-          {/* SCALE CHART */}
           <div className="mt-6">
             <p className="text-sm font-semibold mb-1">Credit Risk Scale</p>
-            <div className="h-3 rounded bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 relative">
+            <div className="h-3 rounded bg-linear-to-r from-green-400 via-yellow-400 to-red-500 relative">
               <div
                 className="absolute top-0 h-3 w-2 bg-black"
                 style={{ left: `${Math.min(pd * 100000, 100)}%` }}
@@ -211,7 +192,7 @@ export const ApplicationDetails = () => {
             </div>
 
             <p className="text-sm font-semibold mt-4 mb-1">Fraud Risk Scale</p>
-            <div className="h-3 rounded bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 relative">
+            <div className="h-3 rounded bg-linear-to-r from-green-400 via-yellow-400 to-red-500 relative">
               <div
                 className="absolute top-0 h-3 w-2 bg-black"
                 style={{ left: `${Math.min(fraud * 100000, 100)}%` }}
@@ -224,13 +205,11 @@ export const ApplicationDetails = () => {
               <span>HIGH</span>
             </div>
 
-            {/* ✅ FIXED DECISION HINT */}
             <div className="mt-4 p-3 bg-slate-100 rounded text-sm font-semibold flex items-center gap-2">
               {(() => {
                 const pdPercent = pd * 100;
                 const fraudPercent = fraud * 100;
 
-                // HIGH → REJECT
                 if (pdPercent >= 0.05 || fraudPercent >= 0.05) {
                   return (
                     <>
@@ -240,7 +219,6 @@ export const ApplicationDetails = () => {
                   );
                 }
 
-                // MEDIUM → ESCALATE
                 if (pdPercent >= 0.01 || fraudPercent >= 0.01 || !emp) {
                   return (
                     <>
@@ -250,7 +228,6 @@ export const ApplicationDetails = () => {
                   );
                 }
 
-                // LOW → APPROVE
                 return (
                   <>
                     <CheckCircle className="text-sky-600" size={18} />
