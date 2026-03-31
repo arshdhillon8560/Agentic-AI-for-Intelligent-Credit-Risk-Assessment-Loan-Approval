@@ -2,12 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { officerAPI } from "../services/api";
 import { Navbar } from "../components/Navbar";
-import {
-  ArrowLeft,
-  AlertTriangle,
-  CheckCircle,
-  XCircle
-} from "lucide-react";
+import { ArrowLeft, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 
 export const ApplicationDetails = () => {
   const { id } = useParams();
@@ -72,14 +67,33 @@ export const ApplicationDetails = () => {
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <p><b>Name:</b> {data.profile?.name}</p>
-            <p><b>DOB:</b> {data.profile?.date_of_birth}</p>
-            <p><b>Gender:</b> {data.profile?.gender}</p>
-            <p><b>Marital:</b> {data.profile?.marital_status}</p>
-            <p><b>PAN:</b> {data.profile?.pan_number}</p>
-            <p><b>Aadhaar:</b> {data.profile?.aadhaar_number}</p>
-            <p><b>City:</b> {data.profile?.city}</p>
-            <p><b>State:</b> {data.profile?.state}</p>
+            <p>
+              <b>Name:</b> {data.profile?.name}
+            </p>
+            <p>
+              <b>DOB:</b>{" "}
+              {new Date(data.profile?.date_of_birth).toLocaleDateString(
+                "en-GB",
+              )}
+            </p>
+            <p>
+              <b>Gender:</b> {data.profile?.gender}
+            </p>
+            <p>
+              <b>Marital:</b> {data.profile?.marital_status}
+            </p>
+            <p>
+              <b>PAN:</b> {data.profile?.pan_number}
+            </p>
+            <p>
+              <b>Aadhaar:</b> {data.profile?.aadhaar_number}
+            </p>
+            <p>
+              <b>City:</b> {data.profile?.city}
+            </p>
+            <p>
+              <b>State:</b> {data.profile?.state}
+            </p>
           </div>
         </div>
 
@@ -90,12 +104,24 @@ export const ApplicationDetails = () => {
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <p><b>Type:</b> {data.employment?.employment_type}</p>
-            <p><b>Employer:</b> {data.employment?.employer_name}</p>
-            <p><b>Job:</b> {data.employment?.job_title}</p>
-            <p><b>Experience:</b> {data.employment?.total_work_experience}</p>
-            <p><b>Income:</b> ₹{data.employment?.monthly_income}</p>
-            <p><b>Salary Mode:</b> {data.employment?.salary_mode}</p>
+            <p>
+              <b>Type:</b> {data.employment?.employment_type}
+            </p>
+            <p>
+              <b>Employer:</b> {data.employment?.employer_name}
+            </p>
+            <p>
+              <b>Job:</b> {data.employment?.job_title}
+            </p>
+            <p>
+              <b>Experience:</b> {data.employment?.total_work_experience}
+            </p>
+            <p>
+              <b>Income:</b> ₹{data.employment?.monthly_income}
+            </p>
+            <p>
+              <b>Salary Mode:</b> {data.employment?.salary_mode}
+            </p>
           </div>
         </div>
 
@@ -106,10 +132,18 @@ export const ApplicationDetails = () => {
           </h2>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <p><b>Existing Loans:</b> {data.financial?.existing_loans}</p>
-            <p><b>EMI:</b> ₹{data.financial?.existing_emi}</p>
-            <p><b>Bank:</b> {data.financial?.bank_name}</p>
-            <p><b>Balance:</b> ₹{data.financial?.average_monthly_balance}</p>
+            <p>
+              <b>Existing Loans:</b> {data.financial?.existing_loans}
+            </p>
+            <p>
+              <b>EMI:</b> ₹{data.financial?.existing_emi}
+            </p>
+            <p>
+              <b>Bank:</b> {data.financial?.bank_name}
+            </p>
+            <p>
+              <b>Balance:</b> ₹{data.financial?.average_monthly_balance}
+            </p>
           </div>
         </div>
 
@@ -152,10 +186,18 @@ export const ApplicationDetails = () => {
 
           {/* ORIGINAL CONTENT */}
           <div className="grid md:grid-cols-2 gap-4">
-            <p><b>Credit PD:</b> {pd}</p>
-            <p><b>Fraud Risk:</b> {fraud}</p>
-            <p><b>Employment Verified:</b> {emp ? "Yes" : "No"}</p>
-            <p><b>AI Decision:</b> {data.agent_result?.final_decision}</p>
+            <p>
+              <b>Credit PD:</b> {pd}
+            </p>
+            <p>
+              <b>Fraud Risk:</b> {fraud}
+            </p>
+            <p>
+              <b>Employment Verified:</b> {emp ? "Yes" : "No"}
+            </p>
+            <p>
+              <b>AI Decision:</b> {data.agent_result?.final_decision}
+            </p>
           </div>
 
           {/* SCALE CHART */}
@@ -203,7 +245,7 @@ export const ApplicationDetails = () => {
                   return (
                     <>
                       <AlertTriangle className="text-yellow-500" size={18} />
-                      <span>Medium Risk → Recommended: ESCALATE</span>
+                      <span>Medium Risk → Recommended: APPROVE</span>
                     </>
                   );
                 }

@@ -96,8 +96,7 @@ export const ApplicationStatus = () => {
   const pd = status?.agent_scores?.credit_pd_score ?? 0;
   const fraud = status?.agent_scores?.fraud_probability ?? 0;
 
-  const finalDecision =
-    status?.agent_scores?.final_decision || status?.status;
+  const finalDecision =status?.status;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-sky-50 to-slate-200">
